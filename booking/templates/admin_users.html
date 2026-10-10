@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Manage Users</h2>
+        <a
+            href="{{ url_for('main.create_doctor') }}"
+            class="btn btn-primary mb-3"
+        >
+            Create Doctor
+        </a>
+        <a
+            href="{{ url_for('main.create_admin') }}"
+            class="btn btn-secondary mb-3"
+        >
+            Create Administrator
+        </a>
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th>Specialization</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for user in users %}
+                <tr>
+                    <td>{{ user.name }}</td>
+                    <td>{{ user.email }}</td>
+                    <td>{{ user.role }}</td>
+                    <td>
+                        {{ user.specialization or "-" }}
+                    </td>
+                </tr>
+            {% else %}
+                <tr>
+                    <td
+                        colspan="4"
+                        class="text-center"
+                    >
+                        No users found.
+                    </td>
+                </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

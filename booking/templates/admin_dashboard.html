@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Admin Dashboard</h2>
+    <p class="text-muted">
+        Welcome, {{ current_user.name }}.
+    </p>
+    <div class="row">
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        Users
+                    </h5>
+                    <p class="card-text">
+                        Manage patients, doctors, and administrators.
+                    </p>
+                    <a
+                        href="{{ url_for('main.admin_users') }}"
+                        class="btn btn-primary"
+                    >
+                        Manage Users
+                    </a>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4 mb-3">
+            <div class="card">
+                <div class="card-body">
+                    <h5 class="card-title">
+                        Appointments
+                    </h5>
+                    <p class="card-text">
+                        View and manage all appointments.
+                    </p>
+                    <a
+                        href="{{ url_for('main.admin_appointments') }}"
+                        class="btn btn-primary"
+                    >
+                        Manage Appointments
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

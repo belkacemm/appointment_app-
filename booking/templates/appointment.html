@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>Book an Appointment</h2>
+    <form method="POST">
+        {{ availability_form.hidden_tag() }}
+        <div class="mb-3">
+            {{ availability_form.doctor_id.label(class="form-label") }}
+            {{ availability_form.doctor_id(class="form-select") }}
+            {% for error in availability_form.doctor_id.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        <div class="mb-3">
+            {{ availability_form.appointment_date.label(class="form-label") }}
+            {{ availability_form.appointment_date(class="form-control") }}
+            {% for error in availability_form.appointment_date.errors %}
+                <div class="text-danger">{{ error }}</div>
+            {% endfor %}
+        </div>
+        {{ availability_form.check_availability(
+            class="btn btn-primary"
+        ) }}
+    </form>
+    {% if available_times %}
+        <hr class="my-4">
+        <form method="POST">
+            {{ appointment_form.hidden_tag() }}
+            {{ appointment_form.doctor_id(
+                type="hidden"
+            ) }}
+            {{ appointment_form.appointment_date(
+                type="hidden"
+            ) }}
+            <div class="mb-3">
+                {{ appointment_form.appointment_time.label(
+                    class="form-label"
+                ) }}
+                {{ appointment_form.appointment_time(
+                    class="form-select"
+                ) }}
+                {% for error in appointment_form.appointment_time.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            <div class="mb-3">
+                {{ appointment_form.reason.label(
+                    class="form-label"
+                ) }}
+                {{ appointment_form.reason(
+                    class="form-control",
+                    rows="4"
+                ) }}
+                {% for error in appointment_form.reason.errors %}
+                    <div class="text-danger">{{ error }}</div>
+                {% endfor %}
+            </div>
+            {{ appointment_form.book_appointment(
+                class="btn btn-success"
+            ) }}
+        </form>
+    {% endif %}
+</div>
+{% endblock %}

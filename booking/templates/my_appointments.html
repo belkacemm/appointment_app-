@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-4">
+    <h2>My Appointments</h2>
+    {% if appointments %}
+        <div class="table-responsive mt-4">
+            <table class="table table-bordered table-striped">
+                <thead>
+                    <tr>
+                        <th>Doctor</th>
+                        <th>Specialization</th>
+                        <th>Date</th>
+                        <th>Time</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for appointment in appointments %}
+                        <tr>
+                            <td>
+                                {{ appointment.doctor.name }}
+                            </td>
+                            <td>
+                                {{ appointment.doctor.specialization }}
+                            </td>
+                            <td>
+                                {{ appointment.appointment_date }}
+                            </td>
+                            <td>
+                                {{ appointment.appointment_time.strftime("%I:%M %p") }}
+                            </td>
+                            <td>
+                                {{ appointment.reason }}
+                            </td>
+                            <td>
+                                {{ appointment.status }}
+                            </td>
+                            <td>
+                                {% if appointment.status == "booked" %}
+
+                                    <form
+                                        method="POST"
+                                        action="{{ url_for(
+                                        'main.cancel_appointment',
+                                        appointment_id=appointment.id
+                                        ) }}"
+                                        >
+                                        <input
+                                            type="hidden"
+                                            name="csrf_token"
+                                            value="{{ csrf_token() }}"
+                                        >
+                                        <button
+                                            type="submit"
+                                            class="btn btn-danger btn-sm"
+                                        >
+                                            Cancel
+                                        </button>
+                                    </form>
+                                {% else %}
+                                    <span class="text-muted">
+                                        No action
+                                    </span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info mt-4">
+            You do not have any appointments yet.
+        </div>
+    {% endif %}
+</div>
+{% endblock %}
