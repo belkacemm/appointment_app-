@@ -119,7 +119,7 @@ def appointment():
     # -------------------------
     # STEP 1: Check availability
     # -------------------------
-    if availability_form.check_availability.data:
+    if (availability_form.check_availability.data and not appointment_form.book_appointment.data):
         if availability_form.validate():
             selected_doctor = availability_form.doctor_id.data
             selected_date = availability_form.appointment_date.data
@@ -185,7 +185,7 @@ def appointment():
                     "appointment.html",
                     availability_form=availability_form,
                     appointment_form=appointment_form,
-                    available_times=[],
+                    available_times=generate_time_slots(),
                 )
             appointment = Appointment(
                 patient_id=current_user.id,
