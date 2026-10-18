@@ -177,3 +177,148 @@ def test_patient_cannot_book_an_already_booked_slot(
     ).all()
 
     assert len(matching_appointments) == 1
+
+def test_patient_can_cancel_own_appointment(app, client, users):
+    appointment = Appointment(
+        patient_id=users["patient"].id,
+        doctor_id=users["doctor"].id,
+        appointment_date=date(2099, 5, 20),
+        appointment_time=time(9, 0),
+        reason="Routine checkup",
+        status="booked",
+    )
+
+    db.session.add(appointment)
+    db.session.commit()
+
+    appointment_id = appointment.id
+
+    # Log in as the patient who owns the appointment.
+    client.post(
+        "/login",
+        data={
+            "email": users["patient"].email,
+            "password": "test-password",
+        },
+        follow_redirects=True,
+    )
+
+    # Cancel the appointment.
+    response = client.post(
+        f"/appointment/{appointment_id}/cancel",
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Your appointment was cancelled successfully." in response.data
+
+    # Confirm that the cancellation was saved in the database.
+    cancelled_appointment = db.session.get(
+        Appointment,
+        appointment_id,
+    )
+
+    assert cancelled_appointment.status == "cancelled"
+
+def test_patient_cannot_cancel_another_patients_appointment(
+    app, client, users
+):
+    appointment = Appointment(
+        patient_id=users["second_patient"].id,
+        doctor_id=users["doctor"].id,
+        appointment_date=date(2099, 5, 20),
+        appointment_time=time(9, 0),
+        reason="Another patient's appointment",
+        status="booked",
+    )
+
+    db.session.add(appointment)
+    db.session.commit()
+
+    appointment_id = appointment.id
+
+    # Log in as a different patient.
+    client.post(
+        "/login",
+        data={
+            "email": users["patient"].email,
+            "password": "test-password",
+        },
+        follow_redirects=True,
+    )
+
+    # Attempt to cancel the other patient's appointment.
+    response = client.post(
+        f"/appointment/{appointment_id}/cancel",
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert (
+        b"You are not authorized to cancel this appointment."
+        in response.data
+    )
+
+    # Confirm that the appointment remains booked.
+    appointment = db.session.get(Appointment, appointment_id)
+    assert appointment.status == "booked"
+
+def test_patient_cannot_cancel_already_cancelled_appointment(
+    app, client, users
+):
+    appointment = Appointment(
+        patient_id=users["patient"].id,
+        doctor_id=users["doctor"].id,
+        appointment_date=date(2099, 5, 20),
+        appointment_time=time(9, 0),
+        reason="Routine checkup",
+        status="cancelled",
+    )
+
+    db.session.add(appointment)
+    db.session.commit()
+
+    appointment_id = appointment.id
+
+    # Log in as the patient who owns the appointment.
+    client.post(
+        "/login",
+        data={
+            "email": users["patient"].email,
+            "password": "test-password",
+        },
+        follow_redirects=True,
+    )
+
+    # Attempt to cancel the appointment again.
+    response = client.post(
+        f"/appointment/{appointment_id}/cancel",
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"This appointment cannot be cancelled." in response.data
+
+    # Confirm the appointment remains cancelled.
+    appointment = db.session.get(Appointment, appointment_id)
+    assert appointment.status == "cancelled"
+
+def test_cannot_cancel_nonexistent_appointment(app, client, users):
+    # Log in as a patient.
+    client.post(
+        "/login",
+        data={
+            "email": users["patient"].email,
+            "password": "test-password",
+        },
+        follow_redirects=True,
+    )
+
+    # Use an ID that does not exist in the database.
+    response = client.post(
+        "/appointment/999999/cancel",
+        follow_redirects=True,
+    )
+
+    assert response.status_code == 200
+    assert b"Appointment not found." in response.data
