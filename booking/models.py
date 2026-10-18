@@ -1,4 +1,4 @@
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_login import UserMixin
 from .extensions import db
 
@@ -51,8 +51,8 @@ class Appointment(db.Model):
         default="booked",
     )
     created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow,
+        db.DateTime(timezone=True),
+        default=lambda: datetime.now(timezone.utc),
         nullable=False,
     )
     patient = db.relationship(
